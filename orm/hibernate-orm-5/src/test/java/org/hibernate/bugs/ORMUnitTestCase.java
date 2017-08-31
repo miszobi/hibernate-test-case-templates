@@ -20,7 +20,12 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
+import org.hibernate.type.IntegerType;
 import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * This template demonstrates how to develop a test case for Hibernate ORM, using its built-in unit test framework.
@@ -46,8 +51,7 @@ public class ORMUnitTestCase extends BaseCoreFunctionalTestCase {
 	@Override
 	protected String[] getMappings() {
 		return new String[] {
-//				"Foo.hbm.xml",
-//				"Bar.hbm.xml"
+				"hilogenerator-tablestructure.xml"
 		};
 	}
 	// If those mappings reside somewhere other than resources/org/hibernate/test, change this.
@@ -68,11 +72,18 @@ public class ORMUnitTestCase extends BaseCoreFunctionalTestCase {
 
 	// Add your tests, using standard JUnit.
 	@Test
-	public void hhh123Test() throws Exception {
-		// BaseCoreFunctionalTestCase automatically creates the SessionFactory and provides the Session.
+	public void hhh11960Test() throws Exception {
+		// SchemaExport seems to have already run at this point based on the mappings,
+		// so test the results of that
 		Session s = openSession();
 		Transaction tx = s.beginTransaction();
-		// Do stuff...
+
+		List<Integer> sequenceIds = s.createNativeQuery("SELECT next_val FROM hibernate_sequence")
+				.addScalar("next_val", IntegerType.INSTANCE)
+				.list();
+		assertEquals("Sequence table should contain a single next_hi value", new Integer[]{1},
+				sequenceIds.toArray(new Integer[1]));
+
 		tx.commit();
 		s.close();
 	}
